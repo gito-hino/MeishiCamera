@@ -18,9 +18,9 @@ class OcrService {
       throw Exception('Gemini API Key is not set');
     }
 
-    // モデル名を 'models/gemini-1.5-flash' と明示的に指定
+    // モデル名を 'gemini-1.5-flash' に戻す
     final model = GenerativeModel(
-      model: 'models/gemini-1.5-flash',
+      model: 'gemini-1.5-flash',
       apiKey: config.geminiApiKey,
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
