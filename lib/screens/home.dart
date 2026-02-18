@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../providers/config.dart';
 import 'camera.dart';
 import 'settings.dart';
 import 'list.dart';
 import 'confirm.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(configProvider);
+    final isConfigMissing =
+        config.gasUrl.isEmpty || config.geminiApiKey.isEmpty;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Meishi Camera'),
@@ -24,58 +30,115 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Spacer(),
-            _MenuButton(
-              icon: Icons.camera_alt,
-              label: '名刺を撮影',
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const CameraScreen()),
-                );
-              },
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 16),
-            _MenuButton(
-              icon: Icons.photo_library,
-              label: 'ギャラリーから取り込み',
-              onPressed: () async {
-                final picker = ImagePicker();
-                final image = await picker.pickImage(
-                  source: ImageSource.gallery,
-                );
-                if (image != null && context.mounted) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => ConfirmScreen(imagePath: image.path),
+      body: Column(
+        children: [
+          if (isConfigMissing)
+            Container(
+              color: Colors.amber.shade100,
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning, color: Colors.orange),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      '設定（GAS URL / Gemini API Key）が未完了です。設定画面から入力してください。',
+                      style: TextStyle(fontSize: 13),
                     ),
-                  );
-                }
-              },
-              color: Colors.blueGrey,
-            ),
-            const SizedBox(height: 16),
-            _MenuButton(
-              icon: Icons.list_alt,
-              label: '登録済み名刺',
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const BusinessCardListScreen(),
                   ),
-                );
-              },
-              color: Colors.orange,
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('設定へ'),
+                  ),
+                ],
+              ),
             ),
-            const Spacer(),
-          ],
-        ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Spacer(),
+                  _MenuButton(
+                    icon: Icons.camera_alt,
+                    label: '名刺を撮影',
+                    onPressed:
+                        isConfigMissing
+                            ? () => _showConfigWarning(context)
+                            : () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => const CameraScreen(),
+                                ),
+                              );
+                            },
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(height: 16),
+                  _MenuButton(
+                    icon: Icons.photo_library,
+                    label: 'ギャラリーから取り込み',
+                    onPressed:
+                        isConfigMissing
+                            ? () => _showConfigWarning(context)
+                            : () async {
+                              final picker = ImagePicker();
+                              final image = await picker.pickImage(
+                                source: ImageSource.gallery,
+                              );
+                              if (image != null && context.mounted) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => ConfirmScreen(
+                                          imagePath: image.path,
+                                        ),
+                                  ),
+                                );
+                              }
+                            },
+                    color: Colors.blueGrey,
+                  ),
+                  const SizedBox(height: 16),
+                  _MenuButton(
+                    icon: Icons.list_alt,
+                    label: '登録済み名刺',
+                    onPressed:
+                        isConfigMissing
+                            ? () => _showConfigWarning(context)
+                            : () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) =>
+                                          const BusinessCardListScreen(),
+                                ),
+                              );
+                            },
+                    color: Colors.orange,
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showConfigWarning(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('先に設定画面から GAS URL と Gemini API Key を入力してください。'),
+        backgroundColor: Colors.orange,
       ),
     );
   }
