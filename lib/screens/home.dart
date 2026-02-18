@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'camera.dart';
 import 'settings.dart';
+import 'list.dart';
+import 'confirm.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -41,8 +44,19 @@ class HomeScreen extends StatelessWidget {
             _MenuButton(
               icon: Icons.photo_library,
               label: 'ギャラリーから取り込み',
-              onPressed: () {
-                // TODO: ギャラリー起動
+              onPressed: () async {
+                final picker = ImagePicker();
+                final image = await picker.pickImage(
+                  source: ImageSource.gallery,
+                );
+                if (image != null && context.mounted) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (context) => ConfirmScreen(imagePath: image.path),
+                    ),
+                  );
+                }
               },
               color: Colors.blueGrey,
             ),
@@ -51,7 +65,11 @@ class HomeScreen extends StatelessWidget {
               icon: Icons.list_alt,
               label: '登録済み名刺',
               onPressed: () {
-                // TODO: 一覧画面へ
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const BusinessCardListScreen(),
+                  ),
+                );
               },
               color: Colors.orange,
             ),
