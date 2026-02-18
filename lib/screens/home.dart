@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'camera.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -27,7 +28,9 @@ class HomeScreen extends StatelessWidget {
               icon: Icons.camera_alt,
               label: '名刺を撮影',
               onPressed: () {
-                // TODO: カメラ起動
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const CameraScreen()),
+                );
               },
               color: Theme.of(context).primaryColor,
             ),
@@ -83,12 +86,9 @@ class _MenuButton extends StatelessWidget {
         backgroundColor: color,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,
       ),
     );
   }
 }
-
