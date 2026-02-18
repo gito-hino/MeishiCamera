@@ -18,8 +18,9 @@ class OcrService {
       throw Exception('Gemini API Key is not set');
     }
 
+    // モデル名を 'models/gemini-1.5-flash' と明示的に指定
     final model = GenerativeModel(
-      model: 'gemini-1.5-flash',
+      model: 'models/gemini-1.5-flash',
       apiKey: config.geminiApiKey,
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
@@ -27,6 +28,7 @@ class OcrService {
     final imageBytes = await File(imagePath).readAsBytes();
     final prompt = TextPart('''
       提供された名刺画像から情報を抽出し、以下のJSON形式で出力してください。
+      必ず有効なJSONのみを返し、解説などは含めないでください。
       不明な項目は空文字にしてください。
       {
         "name": "氏名",
@@ -43,9 +45,12 @@ class OcrService {
 
     try {
       final response = await model.generateContent(content);
-      if (response.text == null) return null;
+      final text = response.text;
+      if (text == null) {
+        throw Exception('解析結果が空でした');
+      }
 
-      final jsonMap = json.decode(response.text!) as Map<String, dynamic>;
+      final jsonMap = json.decode(text) as Map<String, dynamic>;
       return BusinessCard.fromJson(jsonMap);
     } catch (e) {
       print('Gemini OCR Error: $e');
