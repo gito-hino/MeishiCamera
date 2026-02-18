@@ -15,7 +15,13 @@ class AppConfig {
 }
 
 class AppConfigNotifier extends StateNotifier<AppConfig> {
-  AppConfigNotifier() : super(AppConfig());
+  AppConfigNotifier()
+    : super(
+        AppConfig(
+          gasUrl:
+              'https://script.google.com/macros/s/AKfycbxLNIT_xEGE70Shh8-dt7y7i_n88cBYKhgsZARVBWI3tWVDOTCJ9Vwoz-zgnF6TO50a/exec',
+        ),
+      );
 
   void setGasUrl(String url) => state = state.copyWith(gasUrl: url);
   void setGeminiApiKey(String key) => state = state.copyWith(geminiApiKey: key);
